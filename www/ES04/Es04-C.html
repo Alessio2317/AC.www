@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
@@ -344,12 +344,223 @@
 
       </div>
 
-      <div class="calc-footer">TPS \u00b7 Alessio Cainarca \u00b7 2025/26</div>
-    </div>
+      <div class="calc-footer">TPS · Alessio Cainarca · 2025/26</div>    </div>
 
   </div>
 
   <script>
-    /* \u2500\u2500 STATE \u2500\u2500 */
+    /* ── STATE ── */
     const state = {
-      current:
+      current:    '0',      // displayed number (string)
+      previous:   null,     // first operand (number)
+      operator:   null,     // pending operator
+      waitingForOperand: false
+    };
+
+    /* ── DOM ── */
+    const valEl   = document.getElementById('value');
+    const exprEl  = document.getElementById('expr');
+    const display = document.getElementById('display');
+
+    /* ── RENDER ── */
+    function render(value, expr = '') {
+      // Clamp font size
+      valEl.classList.remove('error', 'small', 'xsmall');
+      valEl.textContent = value;
+      const len = String(value).length;
+      if (len > 12) valEl.classList.add('xsmall');
+      else if (len > 8) valEl.classList.add('small');
+      exprEl.textContent = expr;
+    }
+
+    function renderError(msg) {
+      valEl.classList.add('error');
+      valEl.textContent = msg;
+      exprEl.textContent = '';
+      display.classList.remove('shaking');
+      void display.offsetWidth; // reflow
+      display.classList.add('shaking');
+    }
+
+    /* ── OPERATOR HIGHLIGHT ── */
+    function highlightOp(op) {
+      document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('active-op'));
+      if (op) {
+        document.querySelectorAll('.btn-op').forEach(b => {
+          if (b.dataset.op === op) b.classList.add('active-op');
+        });
+      }
+    }
+
+    /* ── COMPUTE ── */
+    function compute(a, op, b) {
+      switch (op) {
+        case '+': return a + b;
+        case '−': return a - b;
+        case '×': return a * b;
+        case '÷':
+          if (b === 0) return null; // division by zero
+          return a / b;
+      }
+    }
+
+    function formatResult(n) {
+      if (!isFinite(n)) return 'Errore';
+      // Up to 10 significant digits, strip trailing zeros
+      let s = parseFloat(n.toPrecision(10)).toString();
+      return s;
+    }
+
+    /* ── ACTIONS ── */
+    function handleDigit(digit) {
+      if (state.waitingForOperand) {
+        state.current = digit === '0' ? '0' : digit;
+        state.waitingForOperand = false;
+      } else {
+        if (state.current === '0' && digit !== '.') {
+          state.current = digit;
+        } else if (state.current.length < 12) {
+          state.current += digit;
+        }
+      }
+      render(state.current, buildExpr());
+    }
+
+    function handleDecimal() {
+      if (state.waitingForOperand) {
+        state.current = '0.';
+        state.waitingForOperand = false;
+        render(state.current, buildExpr());
+        return;
+      }
+      if (!state.current.includes('.')) {
+        state.current += '.';
+        render(state.current, buildExpr());
+      }
+    }
+
+    function handleOp(op) {
+      const curr = parseFloat(state.current);
+
+      if (state.operator && !state.waitingForOperand) {
+        const result = compute(state.previous, state.operator, curr);
+        if (result === null) { renderError('Errore: divisione per zero'); reset(); return; }
+        state.previous = result;
+        state.current  = formatResult(result);
+      } else {
+        state.previous = curr;
+      }
+
+      state.operator = op;
+      state.waitingForOperand = true;
+      highlightOp(op);
+      render(state.current, buildExpr(op));
+    }
+
+    function handleEquals() {
+      if (state.operator === null) return;
+      const curr = parseFloat(state.current);
+      const exprStr = `${formatResult(state.previous)} ${state.operator} ${formatResult(curr)} =`;
+      const result  = compute(state.previous, state.operator, curr);
+
+      if (result === null) { renderError('Errore: divisione per zero'); reset(); return; }
+      if (!isFinite(result)) { renderError('Overflow'); reset(); return; }
+
+      state.current  = formatResult(result);
+      state.previous = null;
+      state.operator = null;
+      state.waitingForOperand = true;
+      highlightOp(null);
+      render(state.current, exprStr);
+    }
+
+    function handleClear() {
+      reset();
+      render('0', '');
+      highlightOp(null);
+    }
+
+    function handleSign() {
+      if (state.current === '0') return;
+      state.current = state.current.startsWith('-')
+        ? state.current.slice(1)
+        : '-' + state.current;
+      render(state.current, buildExpr());
+    }
+
+    function handlePercent() {
+      const n = parseFloat(state.current) / 100;
+      state.current = formatResult(n);
+      render(state.current, buildExpr());
+    }
+
+    function reset() {
+      state.current = '0';
+      state.previous = null;
+      state.operator = null;
+      state.waitingForOperand = false;
+    }
+
+    function buildExpr(pendingOp) {
+      const op = pendingOp || state.operator;
+      if (state.previous !== null && op) {
+        return `${formatResult(state.previous)} ${op}`;
+      }
+      return '';
+    }
+
+    /* ── BUTTON CLICKS ── */
+    document.getElementById('calc').addEventListener('click', e => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+
+      // Remove shaking class on any interaction
+      display.classList.remove('shaking');
+
+      const { action, op, digit } = btn.dataset;
+
+      switch (action) {
+        case 'digit':   handleDigit(digit);  break;
+        case 'decimal': handleDecimal();     break;
+        case 'op':      handleOp(op);        break;
+        case 'equals':  handleEquals();      break;
+        case 'clear':   handleClear();       break;
+        case 'sign':    handleSign();        break;
+        case 'percent': handlePercent();     break;
+      }
+
+      // AC ↔ C label
+      const clearBtn = document.querySelector('[data-action="clear"]');
+      if (state.current !== '0' || state.previous !== null) {
+        clearBtn.textContent = 'C';
+      } else {
+        clearBtn.textContent = 'AC';
+      }
+    });
+
+    /* ── KEYBOARD SUPPORT ── */
+    document.addEventListener('keydown', e => {
+      if (e.key >= '0' && e.key <= '9') handleDigit(e.key);
+      else if (e.key === '.') handleDecimal();
+      else if (e.key === '+') handleOp('+');
+      else if (e.key === '-') handleOp('−');
+      else if (e.key === '*') handleOp('×');
+      else if (e.key === '/') { e.preventDefault(); handleOp('÷'); }
+      else if (e.key === 'Enter' || e.key === '=') handleEquals();
+      else if (e.key === 'Escape') handleClear();
+      else if (e.key === 'Backspace') {
+        if (state.current.length > 1) {
+          state.current = state.current.slice(0, -1);
+        } else {
+          state.current = '0';
+        }
+        render(state.current, buildExpr());
+      }
+    });
+
+    // Initial render
+    render('0');
+  </script>
+
+</body>
+</html>
