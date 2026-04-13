@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calcolatrice \u2014 ES04\u00b7C</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Syncopate:wght@700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --accent: #5b6fff;
+      --accent2: #00e5c0;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --card: #13131d;
+
+      /* Calc-specific (Apple-inspired tones remapped to palette) */
+      --btn-dark:    #1a1a27;
+      --btn-mid:     #22223a;
+      --btn-op:      #5b6fff;
+      --btn-op-text: #ffffff;
+      --btn-fn:      #1e1e30;
+      --btn-fn-text: #9090b0;
+      --display-bg:  #0d0d16;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* Blobs */
+    .blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(120px); pointer-events: none; z-index: 0;
+    }
+    .blob-1 { width:500px; height:500px; background:rgba(91,111,255,.12); top:-100px; left:-100px; }
+    .blob-2 { width:400px; height:400px; background:rgba(0,229,192,.08); bottom:100px; right:-80px; }
+
+    /* NAV */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:20px 48px;
+      border-bottom:1px solid var(--border);
+      background:rgba(10,10,15,.85);
+      backdrop-filter:blur(16px);
+    }
+    .nav-logo {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem;
+      letter-spacing:-.02em; color:var(--text); text-decoration:none;
+    }
+    .nav-logo span { color:var(--accent); }
+    .nav-tag {
+      font-size:.72rem; color:var(--muted); letter-spacing:.12em;
+      text-transform:uppercase; border:1px solid var(--border);
+      padding:6px 14px; border-radius:100px;
+    }
+    .nav-back {
+      font-size:.72rem; color:var(--muted); letter-spacing:.08em;
+      text-decoration:none; display:flex; align-items:center; gap:6px;
+      transition:color .2s;
+    }
+    .nav-back:hover { color:var(--accent); }
+
+    /* WRAPPER */
+    .wrapper {
+      position:relative; z-index:1;
+      display:flex; flex-direction:column; align-items:center;
+      padding:100px 24px 60px;
+      gap:12px;
+      animation: fadeUp .5s ease both;
+    }
+
+    /* EYEBROW */
+    .eyebrow {
+      display:flex; align-items:center; gap:10px;
+      margin-bottom:8px; align-self:flex-start;
+    }
+    .eyebrow .dot {
+      width:7px; height:7px; border-radius:50%;
+      background:var(--accent2); box-shadow:0 0 10px var(--accent2);
+      animation:pulse 2s ease infinite;
+    }
+    .eyebrow span { font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+
+    @keyframes pulse {
+      0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)}
+    }
+
+    /* CALCULATOR SHELL */
+    .calc {
+      width: 340px;
+      background: rgba(13,13,22,.92);
+      border: 1px solid rgba(91,111,255,.18);
+      border-radius: 32px;
+      padding: 28px 24px 24px;
+      box-shadow:
+        0 40px 80px rgba(0,0,0,.6),
+        0 0 0 1px rgba(255,255,255,.04) inset,
+        0 0 60px rgba(91,111,255,.06);
+      backdrop-filter: blur(20px);
+    }
+
+    /* DISPLAY */
+    .display {
+      background: var(--display-bg);
+      border-radius: 20px;
+      padding: 20px 22px 14px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(91,111,255,.1);
+      min-height: 120px;
+      display:flex; flex-direction:column; justify-content:flex-end;
+      overflow:hidden;
+    }
+
+    .display-expr {
+      font-size: .75rem;
+      color: var(--muted);
+      letter-spacing: .04em;
+      min-height: 18px;
+      text-align: right;
+      margin-bottom: 6px;
+      font-family: 'DM Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      direction: rtl;
+    }
+
+    .display-value {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 3rem;
+      color: var(--text);
+      text-align: right;
+      line-height: 1;
+      letter-spacing: -.03em;
+      transition: font-size .1s;
+      word-break: break-all;
+    }
+
+    .display-value.error {
+      color: #ff5f7e;
+      font-size: 1.1rem;
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+      letter-spacing: .02em;
+    }
+
+    .display-value.small { font-size: 2rem; }
+    .display-value.xsmall { font-size: 1.4rem; }
+
+    /* BUTTON GRID */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    /* Base button */
+    .btn {
+      height: 68px;
+      border-radius: 18px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      display: flex; align-items:center; justify-content:center;
+      transition: transform .09s ease, filter .09s ease, box-shadow .09s ease;
+      position:relative; overflow:hidden; user-select:none;
+    }
+
+    .btn:active { transform: scale(.93); filter:brightness(1.15); }
+
+    /* Ripple */
+    .btn::before {
+      content:''; position:absolute; inset:0; border-radius:inherit;
+      background:rgba(255,255,255,.07); opacity:0; transition:opacity .15s;
+    }
+    .btn:hover::before { opacity:1; }
+
+    /* Number button */
+    .btn-num {
+      background: var(--btn-mid);
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    }
+
+    /* Zero spans 2 cols */
+    .btn-zero {
+      grid-column: span 2;
+      border-radius: 34px;
+      justify-content: flex-start;
+      padding-left: 26px;
+    }
+
+    /* Function (AC, +/-, %) */
+    .btn-fn {
+      background: var(--btn-fn);
+      color: var(--btn-fn-text);
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      font-size:1rem;
+    }
+
+    /* Operator */
+    .btn-op {
+      background: var(--btn-op);
+      color: var(--btn-op-text);
+      box-shadow: 0 4px 16px rgba(91,111,255,.35);
+      font-size:1.4rem;
+    }
+
+    .btn-op.active-op {
+      background: #e8e8f0;
+      color: var(--accent);
+    }
+
+    /* Equals */
+    .btn-eq {
+      background: linear-gradient(135deg, #5b6fff, #00e5c0);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(91,111,255,.45);
+      font-size:1.4rem;
+    }
+
+    /* Decimal */
+    .btn-dot { font-size:1.6rem; }
+
+    /* ERROR flash */
+    @keyframes errorShake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-6px)}
+      40%{transform:translateX(6px)}
+      60%{transform:translateX(-4px)}
+      80%{transform:translateX(4px)}
+    }
+    .display.shaking { animation: errorShake .35s ease; }
+
+    @keyframes fadeUp {
+      from{opacity:0;transform:translateY(24px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* FOOTER inside calc */
+    .calc-footer {
+      text-align:center;
+      margin-top:18px;
+      font-size:.65rem;
+      color:var(--muted);
+      letter-spacing:.08em;
+    }
+
+    @media(max-width:400px){
+      .calc{ width:100%; border-radius:24px; }
+      nav{ padding:16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <nav>
+    <a href="../index.html" class="nav-logo">AC<span>.</span></a>
+    <span class="nav-tag">ES04 \u00b7 C</span>
+    <a href="../index.html" class="nav-back">\u2190 indietro</a>
+  </nav>
+
+  <div class="wrapper">
+
+    <div class="eyebrow">
+      <div class="dot"></div>
+      <span>Esercizio 04-C \u2014 Calcolatrice</span>
+    </div>
+
+    <div class="calc" id="calc">
+
+      <!-- DISPLAY -->
+      <div class="display" id="display">
+        <div class="display-expr" id="expr"></div>
+        <div class="display-value" id="value">0</div>
+      </div>
+
+      <!-- BUTTON GRID -->
+      <div class="btn-grid">
+
+        <!-- Row 1 -->
+        <button class="btn btn-fn" data-action="clear">AC</button>
+        <button class="btn btn-fn" data-action="sign">+/\u2212</button>
+        <button class="btn btn-fn" data-action="percent">%</button>
+        <button class="btn btn-op" data-action="op" data-op="\u00f7">\u00f7</button>
+
+        <!-- Row 2 -->
+        <button class="btn btn-num" data-action="digit" data-digit="7">7</button>
+        <button class="btn btn-num" data-action="digit" data-digit="8">8</button>
+        <button class="btn btn-num" data-action="digit" data-digit="9">9</button>
+        <button class="btn btn-op" data-action="op" data-op="\u00d7">\u00d7</button>
+
+        <!-- Row 3 -->
+        <button class="btn btn-num" data-action="digit" data-digit="4">4</button>
+        <button class="btn btn-num" data-action="digit" data-digit="5">5</button>
+        <button class="btn btn-num" data-action="digit" data-digit="6">6</button>
+        <button class="btn btn-op" data-action="op" data-op="\u2212">\u2212</button>
+
+        <!-- Row 4 -->
+        <button class="btn btn-num" data-action="digit" data-digit="1">1</button>
+        <button class="btn btn-num" data-action="digit" data-digit="2">2</button>
+        <button class="btn btn-num" data-action="digit" data-digit="3">3</button>
+        <button class="btn btn-op" data-action="op" data-op="+">+</button>
+
+        <!-- Row 5 -->
+        <button class="btn btn-num btn-zero" data-action="digit" data-digit="0">0</button>
+        <button class="btn btn-num btn-dot" data-action="decimal">.</button>
+        <button class="btn btn-eq" data-action="equals">=</button>
+
+      </div>
+
+      <div class="calc-footer">TPS \u00b7 Alessio Cainarca \u00b7 2025/26</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* \u2500\u2500 STATE \u2500\u2500 */
+    const state = {
+      current:
