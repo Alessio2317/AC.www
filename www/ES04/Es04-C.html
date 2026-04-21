@@ -93,7 +93,7 @@
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 420px;
+      max-width: 340px;
       animation: fadeUp 0.5s ease both;
     }
 
@@ -133,7 +133,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 32px;
+      padding: 28px;
       position: relative;
       overflow: hidden;
     }
@@ -156,16 +156,17 @@
       font-size: 0.72rem;
       color: var(--muted);
       letter-spacing: 0.05em;
-      margin-bottom: 28px;
+      margin-bottom: 22px;
     }
 
+    /* ── Display ── */
     .calc-display {
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      min-height: 64px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      min-height: 72px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -179,7 +180,7 @@
     }
     .display-result {
       font-family: 'Syne', sans-serif;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: var(--text);
       letter-spacing: -0.02em;
@@ -188,82 +189,86 @@
     .display-result.error { color: #ff6b6b; font-size: 1rem; }
     .display-result.success { color: var(--accent2); }
 
-    .fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-
-    .field-group { display: flex; flex-direction: column; gap: 6px; }
-    .field-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
+    /* ── Buttons grid ── */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
-    .field-input {
+
+    .btn {
+      height: 58px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 11px 16px;
+      border-radius: 10px;
       color: var(--text);
       font-family: 'DM Mono', monospace;
-      font-size: 0.88rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      width: 100%;
-    }
-    .field-input:focus {
-      border-color: rgba(91,111,255,0.6);
-      box-shadow: 0 0 0 3px rgba(91,111,255,0.08);
-    }
-    .field-input::placeholder { color: var(--muted); opacity: 0.6; }
-
-    .op-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .op-btn {
-      padding: 10px 0;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 1rem;
+      font-size: 1.1rem;
       cursor: pointer;
       transition: all 0.15s;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .op-btn:hover { border-color: rgba(91,111,255,0.5); color: var(--text); background: rgba(91,111,255,0.06); }
-    .op-btn.active {
-      border-color: var(--accent);
-      background: rgba(91,111,255,0.15);
+    .btn:hover {
+      border-color: rgba(91,111,255,0.4);
+      background: rgba(91,111,255,0.05);
+    }
+    .btn:active { transform: scale(0.95); }
+
+    /* operator buttons */
+    .btn-op {
+      background: rgba(91,111,255,0.1);
+      border-color: rgba(91,111,255,0.25);
       color: var(--accent);
-      box-shadow: 0 0 12px rgba(91,111,255,0.2);
+      font-size: 1.3rem;
+    }
+    .btn-op:hover {
+      background: rgba(91,111,255,0.2);
+      border-color: var(--accent);
+    }
+    .btn-op.active {
+      background: rgba(91,111,255,0.22);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(91,111,255,0.25);
     }
 
-    .calc-btn {
-      width: 100%;
-      padding: 14px;
+    /* = button */
+    .btn-eq {
       background: rgba(91,111,255,0.15);
-      border: 1px solid rgba(91,111,255,0.4);
-      border-radius: 10px;
+      border-color: rgba(91,111,255,0.4);
       color: var(--accent);
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
+      font-size: 1.2rem;
     }
-    .calc-btn:hover {
-      background: rgba(91,111,255,0.25);
+    .btn-eq:hover {
+      background: rgba(91,111,255,0.28);
       border-color: rgba(91,111,255,0.7);
-      box-shadow: 0 6px 24px rgba(91,111,255,0.2);
+      box-shadow: 0 4px 20px rgba(91,111,255,0.2);
       transform: translateY(-1px);
     }
-    .calc-btn:active { transform: translateY(0); }
+
+    /* clear / special */
+    .btn-clear {
+      background: rgba(255,107,107,0.08);
+      border-color: rgba(255,107,107,0.2);
+      color: #ff6b6b;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+    .btn-clear:hover { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.4); }
+
+    .btn-special {
+      background: rgba(0,229,192,0.06);
+      border-color: rgba(0,229,192,0.15);
+      color: var(--accent2);
+      font-size: 0.9rem;
+    }
+    .btn-special:hover { background: rgba(0,229,192,0.12); border-color: rgba(0,229,192,0.3); }
+
+    /* zero spans 2 cols */
+    .btn-zero { grid-column: span 2; }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
@@ -275,10 +280,10 @@
     }
     @keyframes pop {
       0%   { transform: scale(1); }
-      50%  { transform: scale(1.04); }
+      50%  { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
-    .pop { animation: pop 0.2s ease; }
+    .pop { animation: pop 0.18s ease; }
   </style>
 </head>
 <body>
@@ -300,95 +305,190 @@
 
     <div class="calc-card">
       <h1 class="calc-title">Calcolatrice</h1>
-      <p class="calc-subtitle">Inserisci due numeri e seleziona un'operazione</p>
+      <p class="calc-subtitle">Calcolatrice stile iOS con memoria operazione</p>
 
       <div class="calc-display">
-        <div class="display-expr" id="expr">—</div>
+        <div class="display-expr" id="expr"></div>
         <div class="display-result" id="result">0</div>
       </div>
 
-      <div class="fields">
-        <div class="field-group">
-          <label class="field-label">Primo numero</label>
-          <input class="field-input" type="text" id="primoValore" placeholder="es. 12.5" autocomplete="off"/>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Secondo numero</label>
-          <input class="field-input" type="text" id="secondoValore" placeholder="es. 3" autocomplete="off"/>
-        </div>
-      </div>
+      <div class="btn-grid">
+        <!-- row 1 -->
+        <button class="btn btn-clear" id="btnAC">AC</button>
+        <button class="btn btn-special" id="btnSign">+/−</button>
+        <button class="btn btn-special" id="btnPct">%</button>
+        <button class="btn btn-op" data-op="÷">÷</button>
 
-      <div class="op-grid">
-        <button class="op-btn active" data-op="+">+</button>
-        <button class="op-btn" data-op="−">−</button>
-        <button class="op-btn" data-op="×">×</button>
-        <button class="op-btn" data-op="÷">÷</button>
-        <button class="op-btn" data-op="**">xʸ</button>
-      </div>
+        <!-- row 2 -->
+        <button class="btn" data-num="7">7</button>
+        <button class="btn" data-num="8">8</button>
+        <button class="btn" data-num="9">9</button>
+        <button class="btn btn-op" data-op="×">×</button>
 
-      <button class="calc-btn" id="calcBtn">Calcola →</button>
+        <!-- row 3 -->
+        <button class="btn" data-num="4">4</button>
+        <button class="btn" data-num="5">5</button>
+        <button class="btn" data-num="6">6</button>
+        <button class="btn btn-op" data-op="−">−</button>
+
+        <!-- row 4 -->
+        <button class="btn" data-num="1">1</button>
+        <button class="btn" data-num="2">2</button>
+        <button class="btn" data-num="3">3</button>
+        <button class="btn btn-op" data-op="+">+</button>
+
+        <!-- row 5 -->
+        <button class="btn btn-zero" data-num="0">0</button>
+        <button class="btn" data-num=".">.</button>
+        <button class="btn btn-eq" id="btnEq">=</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const opBtns = document.querySelectorAll('.op-btn');
-    let selectedOp = '+';
+    const displayEl = document.getElementById('result');
+    const exprEl    = document.getElementById('expr');
 
-    opBtns.forEach(btn => {
+    let current  = '0';
+    let previous = null;
+    let operator = null;
+    let freshInput = false;
+
+    const opMap   = { '÷': '/', '×': '*', '−': '-', '+': '+' };
+    const opLabel = { '÷': '÷', '×': '×', '−': '−', '+': '+' };
+
+    /* ── Helpers ── */
+    function setDisplay(val) {
+      displayEl.className = 'display-result';
+      const s = String(val);
+      displayEl.textContent = s.length > 12
+        ? parseFloat(parseFloat(val).toPrecision(9)).toString()
+        : s;
+      triggerPop();
+    }
+
+    function setError(msg) {
+      displayEl.className = 'display-result error';
+      displayEl.textContent = msg;
+      triggerPop();
+    }
+
+    function setSuccess(val) {
+      displayEl.className = 'display-result success';
+      const s = String(val);
+      displayEl.textContent = s.length > 12
+        ? parseFloat(parseFloat(val).toPrecision(9)).toString()
+        : s;
+      triggerPop();
+    }
+
+    function triggerPop() {
+      displayEl.classList.remove('pop');
+      void displayEl.offsetWidth;
+      displayEl.classList.add('pop');
+    }
+
+    function markOp(active) {
+      document.querySelectorAll('.btn-op').forEach(b =>
+        b.classList.toggle('active', b.dataset.op === active)
+      );
+    }
+
+    /* ── Number input ── */
+    document.querySelectorAll('[data-num]').forEach(btn => {
       btn.addEventListener('click', () => {
-        opBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedOp = btn.dataset.op;
+        const d = btn.dataset.num;
+        if (freshInput || current === '0') {
+          current = (d === '.') ? '0.' : d;
+          freshInput = false;
+        } else {
+          if (d === '.') { if (!current.includes('.')) current += '.'; }
+          else if (current.length < 12) current += d;
+        }
+        setDisplay(current);
       });
     });
 
-    const opMap = { '+': '+', '−': '-', '×': '*', '÷': '/', '**': '**' };
-    const opLabel = { '+': '+', '−': '−', '×': '×', '÷': '÷', '**': '^' };
+    /* ── Operator ── */
+    document.querySelectorAll('[data-op]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const o = btn.dataset.op;
+        if (previous !== null && !freshInput) compute(false);
+        previous = parseFloat(current);
+        operator = o;
+        freshInput = true;
+        exprEl.textContent = previous + ' ' + opLabel[o];
+        markOp(o);
+        displayEl.className = 'display-result';
+      });
+    });
 
-    document.getElementById('calcBtn').addEventListener('click', calcola);
-    document.addEventListener('keydown', e => { if (e.key === 'Enter') calcola(); });
+    /* ── Equals ── */
+    document.getElementById('btnEq').addEventListener('click', () => {
+      compute(true);
+      markOp(null);
+    });
 
-    function calcola() {
-      const a = parseFloat(document.getElementById('primoValore').value);
-      const b = parseFloat(document.getElementById('secondoValore').value);
-      const exprEl = document.getElementById('expr');
-      const resultEl = document.getElementById('result');
+    /* ── AC ── */
+    document.getElementById('btnAC').addEventListener('click', () => {
+      current = '0'; previous = null; operator = null; freshInput = false;
+      exprEl.textContent = '';
+      setDisplay('0');
+      markOp(null);
+    });
 
-      resultEl.className = 'display-result';
+    /* ── +/− ── */
+    document.getElementById('btnSign').addEventListener('click', () => {
+      current = String(parseFloat(current) * -1);
+      setDisplay(current);
+    });
 
-      if (Number.isNaN(a) || Number.isNaN(b)) {
-        exprEl.textContent = '—';
-        resultEl.textContent = 'Inserisci due numeri validi';
-        resultEl.classList.add('error');
-        return;
+    /* ── % ── */
+    document.getElementById('btnPct').addEventListener('click', () => {
+      current = String(parseFloat(current) / 100);
+      setDisplay(current);
+    });
+
+    /* ── Compute ── */
+    function compute(final) {
+      if (operator === null || previous === null) return;
+      const b = parseFloat(current);
+      const realOp = opMap[operator];
+      if (final) {
+        exprEl.textContent = previous + ' ' + opLabel[operator] + ' ' + b + ' =';
       }
-
-      const realOp = opMap[selectedOp];
-      exprEl.textContent = `${a} ${opLabel[selectedOp]} ${b}`;
-
-      let esito;
+      let result;
       try {
-        if (realOp === '+') esito = a + b;
-        else if (realOp === '-') esito = a - b;
-        else if (realOp === '*') esito = a * b;
-        else if (realOp === '/') {
-          if (b === 0) throw new Error('Divisione per zero');
-          esito = a / b;
-        }
-        else if (realOp === '**') esito = a ** b;
+        if (realOp === '/') {
+          if (b === 0) { setError('Div per zero'); previous = null; operator = null; return; }
+          result = previous / b;
+        } else if (realOp === '*') result = previous * b;
+        else if (realOp === '-') result = previous - b;
+        else result = previous + b;
 
-        const formatted = Number.isInteger(esito) ? esito : parseFloat(esito.toFixed(10));
-        resultEl.textContent = formatted;
-        resultEl.classList.add('success');
-      } catch (err) {
-        resultEl.textContent = err.message;
-        resultEl.classList.add('error');
-      }
-
-      resultEl.classList.remove('pop');
-      void resultEl.offsetWidth;
-      resultEl.classList.add('pop');
+        const formatted = parseFloat(result.toPrecision(10));
+        current = String(formatted);
+        if (final) { setSuccess(formatted); previous = null; operator = null; }
+        else { setDisplay(formatted); previous = formatted; }
+        freshInput = true;
+      } catch(e) { setError('Errore'); }
     }
+
+    /* ── Keyboard ── */
+    document.addEventListener('keydown', e => {
+      if (e.key >= '0' && e.key <= '9') document.querySelector(`[data-num="${e.key}"]`)?.click();
+      else if (e.key === '.') document.querySelector('[data-num="."]')?.click();
+      else if (e.key === '+') document.querySelector('[data-op="+"]')?.click();
+      else if (e.key === '-') document.querySelector('[data-op="−"]')?.click();
+      else if (e.key === '*') document.querySelector('[data-op="×"]')?.click();
+      else if (e.key === '/') { e.preventDefault(); document.querySelector('[data-op="÷"]')?.click(); }
+      else if (e.key === 'Enter' || e.key === '=') document.getElementById('btnEq').click();
+      else if (e.key === 'Escape') document.getElementById('btnAC').click();
+      else if (e.key === 'Backspace') {
+        if (current.length > 1) { current = current.slice(0, -1); setDisplay(current); }
+        else { current = '0'; setDisplay('0'); }
+      }
+    });
   </script>
 </body>
 </html>
