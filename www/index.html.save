@@ -561,31 +561,417 @@
           </a>
         </div>
 
-	<!-- ^t^ ^t^ ES06 ^t^ ^t^ -->
-<div class="ex-group">
-  <div class="ex-group-header">
-    <div class="ex-group-tag">ES06</div>
-    <div class="ex-group-line"></div>
-    <div class="ex-group-count">2 esercizi</div>
+	<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ES05-B — Calcolatrice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d14;
+      --grid-line: rgba(255,255,255,0.04);
+      --card:      #13131e;
+      --card2:     #1a1a28;
+      --border:    #2a2a40;
+      --text:      #f0ede8;
+      --muted:     #6a6880;
+      --error:     #e87d7d;
+      --ok:        #7de8a0;
+    }
+
+    body {
+      background: var(--bg);
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 320px;
+      overflow: hidden;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .card-header {
+      padding: 1.4rem 1.4rem 1rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .card-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: monospace;
+    }
+
+    /* Display */
+    .display {
+      background: var(--card2);
+      margin: 0 1rem 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 0.8rem 1.1rem 0.7rem;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .disp-expr {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: monospace;
+      min-height: 16px;
+      margin-bottom: 0.2rem;
+    }
+
+    .disp-main {
+      font-size: 2.6rem;
+      font-weight: 200;
+      color: var(--text);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      word-break: break-all;
+    }
+
+    /* Griglia tasti */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 1rem;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      height: 58px;
+      font-size: 1.1rem;
+      font-weight: 400;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      user-select: none;
+      transition: transform 0.1s, filter 0.1s;
+      background: var(--card2);
+      color: var(--text);
+    }
+
+    .btn:hover  { filter: brightness(1.25); }
+    .btn:active { transform: scale(0.93); }
+
+    .btn-fn {
+      background: #1e3a28;
+      color: #7de8a0;
+      border-color: #2a5a3e;
+      font-size: 0.85rem;
+    }
+
+    .btn-ac {
+      background: #3a1e1e;
+      color: #e87d7d;
+      border-color: #5a2828;
+      font-size: 0.85rem;
+    }
+
+    .btn-op {
+      background: rgba(232,201,125,0.1);
+      color: #e8c97d;
+      border-color: rgba(232,201,125,0.3);
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+      justify-content: flex-start;
+      padding-left: 20px;
+    }
+
+    /* Risultato */
+    .result {
+      margin: 0 1rem 1rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      display: none;
+      animation: fadeUp 0.3s ease both;
+    }
+    .result.ok {
+      background: rgba(125,232,160,0.07);
+      border: 1px solid rgba(125,232,160,0.25);
+      color: var(--ok);
+      display: block;
+    }
+    .result.err {
+      background: rgba(232,125,125,0.07);
+      border: 1px solid rgba(232,125,125,0.25);
+      color: var(--error);
+      display: block;
+    }
+    .result .res-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.65;
+      margin-bottom: 0.2rem;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <div class="card-header">
+      <div class="card-title">Calcolatrice</div>
+      <div class="card-sub">Calcolatrice stile iOS con memoria operazione</div>
+    </div>
+
+    <div class="display">
+      <div class="disp-expr" id="disp-expr"></div>
+      <div class="disp-main" id="disp-main">0</div>
+    </div>
+
+    <div class="btn-grid">
+      <!-- riga 1 -->
+      <button class="btn btn-ac"  onclick="pressAC()">AC</button>
+      <button class="btn btn-fn"  onclick="pressSign()">+/−</button>
+      <button class="btn btn-fn"  onclick="pressPercent()">%</button>
+      <button class="btn btn-op"  onclick="pressOp('/')">÷</button>
+      <!-- riga 2 -->
+      <button class="btn" onclick="pressNum('7')">7</button>
+      <button class="btn" onclick="pressNum('8')">8</button>
+      <button class="btn" onclick="pressNum('9')">9</button>
+      <button class="btn btn-op"  onclick="pressOp('*')">×</button>
+      <!-- riga 3 -->
+      <button class="btn" onclick="pressNum('4')">4</button>
+      <button class="btn" onclick="pressNum('5')">5</button>
+      <button class="btn" onclick="pressNum('6')">6</button>
+      <button class="btn btn-op"  onclick="pressOp('-')">−</button>
+      <!-- riga 4 -->
+      <button class="btn" onclick="pressNum('1')">1</button>
+      <button class="btn" onclick="pressNum('2')">2</button>
+      <button class="btn" onclick="pressNum('3')">3</button>
+      <button class="btn btn-op"  onclick="pressOp('+')">+</button>
+      <!-- riga 5 -->
+      <button class="btn btn-zero" onclick="pressNum('0')">0</button>
+      <button class="btn" onclick="pressDot()">.</button>
+      <button class="btn btn-op"  onclick="pressEq()">=</button>
+    </div>
+
+    <div class="result" id="result">
+      <div class="res-label" id="res-label">Risultato</div>
+      <span id="res-text"></span>
+    </div>
+
   </div>
-  <div class="ex-btn-grid">
-    	<a class="ex-btn" href="ES06/Es06-A.html">
-      		<div class="ex-btn-inner">
-        		<span class="ex-btn-key">A</span>
-        		<span class="ex-btn-label">Calcolatrice con Funzioni</span>
-      	</div>
-      		<span class="ex-btn-arrow"> ^f^r</span>
-    	</a>
-    	<a class="ex-btn" href="https://github.com/Alessio2317/AC.www/blob/main/www/ES05/Es05-B.js">
-      	<div class="ex-btn-inner">
-        	<span class="ex-btn-key">B</span>
-        	<span class="ex-btn-label">Oggetto Libero</span>
-      	</div>
-      	<span class="ex-btn-arrow"> ^f^r</span>
-    	</a>
-  	</div>
-	</div>	
-        
+
+  <script>
+    /* ======================================================
+       JS ORIGINALE — invariato
+    ====================================================== */
+    function calcola() {
+      const n1 = document.getElementById('num1') ? document.getElementById('num1').value.trim() : current;
+      const n2 = document.getElementById('num2') ? document.getElementById('num2').value.trim() : '';
+      const opVal = document.getElementById('op') ? document.getElementById('op').value : '';
+      const resultDiv = document.getElementById('result');
+      const resText   = document.getElementById('res-text');
+      const resLabel  = document.getElementById('res-label');
+
+      resultDiv.className = 'result';
+
+      // validazione
+      if (n1 === '' || n2 === '' || opVal === '') {
+        resLabel.textContent = 'Errore';
+        resText.textContent  = 'Input non valido: compila tutti i campi.';
+        resultDiv.classList.add('err');
+        return;
+      }
+
+      const a = parseFloat(n1);
+      const b = parseFloat(n2);
+
+      if (isNaN(a) || isNaN(b)) {
+        resLabel.textContent = 'Errore';
+        resText.textContent  = 'Input non valido: i valori inseriti non sono numeri.';
+        resultDiv.classList.add('err');
+        return;
+      }
+
+      // calcolo
+      const operazioni = {
+        '+':  (a, b) => a + b,
+        '-':  (a, b) => a - b,
+        '*':  (a, b) => a * b,
+        '/':  (a, b) => a / b,
+        '**': (a, b) => a ** b,
+      };
+
+      if (opVal === '/' && b === 0) {
+        resLabel.textContent = 'Errore';
+        resText.textContent  = 'Input non valido: divisione per zero non consentita.';
+        resultDiv.classList.add('err');
+        return;
+      }
+
+      if (!operazioni[opVal]) {
+        resLabel.textContent = 'Errore';
+        resText.textContent  = 'Input non valido: operazione non riconosciuta.';
+        resultDiv.classList.add('err');
+        return;
+      }
+
+      const risultato = operazioni[opVal](a, b);
+
+      // output
+      resLabel.textContent = `${a} ${opVal} ${b} =`;
+      resText.textContent  = risultato;
+      resultDiv.classList.add('ok');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') calcola();
+    });
+
+    /* ======================================================
+       NUOVE FUNZIONI — logica tasti iOS (aggiunte)
+    ====================================================== */
+    let current    = '0';
+    let prev       = null;
+    let pendingOp  = null;
+    let justEvaled = false;
+
+    const dispMain = document.getElementById('disp-main');
+    const dispExpr = document.getElementById('disp-expr');
+
+    function updateDisplay(v) {
+      let s = String(v);
+      if (s.length > 12) s = parseFloat(v).toExponential(4);
+      dispMain.textContent = s;
+    }
+
+    function showResult(val, label, type) {
+      const resultDiv = document.getElementById('result');
+      const resText   = document.getElementById('res-text');
+      const resLabel  = document.getElementById('res-label');
+      resultDiv.className = 'result ' + type;
+      resLabel.textContent = label;
+      resText.textContent  = val;
+    }
+
+    function pressNum(n) {
+      if (justEvaled) { current = n; justEvaled = false; }
+      else if (current === '0') current = n;
+      else if (current.length < 12) current += n;
+      updateDisplay(current);
+    }
+
+    function pressDot() {
+      if (justEvaled) { current = '0.'; justEvaled = false; }
+      else if (!current.includes('.')) current += '.';
+      updateDisplay(current);
+    }
+
+    function pressOp(o) {
+      if (pendingOp && !justEvaled) calcInternal();
+      prev      = parseFloat(current);
+      pendingOp = o;
+      justEvaled = false;
+      const simboli = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+      dispExpr.textContent = prev + ' ' + (simboli[o] || o);
+      current = '0';
+      document.getElementById('result').className = 'result';
+    }
+
+    function calcInternal() {
+      if (pendingOp === null || prev === null) return;
+      const a = prev;
+      const b = parseFloat(current);
+
+      if (pendingOp === '/' && b === 0) {
+        showResult('Divisione per zero non consentita.', 'Errore', 'err');
+        return;
+      }
+
+      const operazioni = {
+        '+':  (a, b) => a + b,
+        '-':  (a, b) => a - b,
+        '*':  (a, b) => a * b,
+        '/':  (a, b) => a / b,
+      };
+
+      let res = operazioni[pendingOp](a, b);
+      if (typeof res === 'number') res = parseFloat(res.toPrecision(10));
+
+      const simboli = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+      const sim = simboli[pendingOp] || pendingOp;
+      dispExpr.textContent = `${a} ${sim} ${b} =`;
+      showResult(res, `${a} ${sim} ${b} =`, 'ok');
+
+      current    = String(res);
+      prev       = null;
+      pendingOp  = null;
+      justEvaled = true;
+      updateDisplay(current);
+    }
+
+    function pressEq() { calcInternal(); }
+
+    function pressAC() {
+      current = '0'; prev = null; pendingOp = null; justEvaled = false;
+      dispExpr.textContent = '';
+      updateDisplay('0');
+      document.getElementById('result').className = 'result';
+    }
+
+    function pressSign() {
+      if (current !== '0') {
+        current = String(parseFloat(current) * -1);
+        updateDisplay(current);
+      }
+    }
+
+    function pressPercent() {
+      current = String(parseFloat(current) / 100);
+      updateDisplay(current);
+    }
+  </script>
+
+</body>
+</html>
+	        
       </div>
     </div>
   </section>
