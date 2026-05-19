@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tavola Pitagorica — TPS</title>
+  <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Syncopate:wght@700&display=swap)" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --accent: #5b6fff;
+      --accent2: #00e5c0;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --card: #13131d;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 {
+      width: 500px; height: 500px;
+      background: rgba(91, 111, 255, 0.12);
+      top: -100px; left: -100px;
+    }
+    .blob-2 {
+      width: 400px; height: 400px;
+      background: rgba(0, 229, 192, 0.08);
+      bottom: 100px; right: -80px;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-tag {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 100px;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 120px 48px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      text-align: center;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .page-title .highlight {
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--accent);
+    }
+
+    .page-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 48px;
+      text-align: center;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    /* TABLE */
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      overflow-x: auto;
+      animation: fadeUp 0.6s 0.2s ease both;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th {
+      background: linear-gradient(135deg, var(--accent) 0%, #4a5ae8 100%);
+      color: #fff;
+      padding: 14px 18px;
+      text-align: center;
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    th:first-child {
+      border-radius: 8px 0 0 0;
+    }
+
+    th:last-child {
+      border-radius: 0 8px 0 0;
+    }
+
+    td {
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--surface);
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+
+    td:hover {
+      background: rgba(91, 111, 255, 0.15);
+      color: #fff;
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(91, 111, 255, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Righe dispari evidenziate */
+    tr.evidenziato td {
+      background: rgba(91, 111, 255, 0.08);
+      color: var(--text);
+    }
+
+    tr.evidenziato td:hover {
+      background: rgba(91, 111, 255, 0.2);
+    }
+
+    /* LEGENDA */
+    .legenda {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .legenda-colore {
+      width: 20px;
+      height: 20px;
+      background: rgba(91, 111, 255, 0.15);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+    }
+
+    .legenda code {
+      background: var(--card);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* BACK LINK */
+    .back-link {
+      margin-top: 48px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.03em;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .back-link:hover {
+      border-color: rgba(91, 111, 255, 0.6);
+      background: rgba(91, 111, 255, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .back-link .arrow {
+      transition: transform 0.2s;
+    }
+
+    .back-link:hover .arrow {
+      transform: translateX(-3px);
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 32px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left { font-size: 0.75rem; color: var(--muted); }
+    .footer-left strong { color: var(--text); font-family: 'Syne', sans-serif; }
+    .footer-right { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 16px 24px; }
+      .main-content { padding: 100px 24px 60px; }
+      .table-wrapper { padding: 16px; }
+      th, td { padding: 8px 10px; font-size: 0.75rem; }
+      footer { padding: 28px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">AC<span>.</span></a>
+    <span class="nav-tag">TPS · Tavola Pitagorica</span>
+  </nav>
+
+  <main class="main-content">
+    <h1 class="page-title">Tavola <span class="highlight">Pitagorica</span></h1>
+ 
+    <div class="table-wrapper">
+      <table id="pitagorica"></table>
+    </div>
+
+    <div class="legenda">
+      <div class="legenda-colore"></div>
+  
+    </div>
+
+    <a href="index.html" class="back-link">
+      <span class="arrow">←</span>
+      Torna agli esercizi
+    </a>
+  </main>
+
+  <footer>
+    <div class="footer-left">
+      <strong>Alessio Cainarca</strong> · TPS
+    </div>
+    <div class="footer-right">Istituto Tecnico · 2025/26</div>
+  </footer>
+
+  <script>
+    const table = document.getElementById('pitagorica');
+
+    // --- Riga di intestazione ---
+    const thead = document.createElement('tr');
+
+    // Cella vuota angolo in alto a sinistra
+    const thVuota = document.createElement('th');
+    thVuota.textContent = '×';
+    thead.appendChild(thVuota);
+
+    // Intestazioni colonne 1–10
+    for (let c = 1; c <= 10; c++) {
+      const th = document.createElement('th');
+      th.textContent = c;
+      thead.appendChild(th);
+    }
+
+    table.appendChild(thead);
+
+    // --- Righe 1–10 ---
+    for (let r = 1; r <= 10; r++) {
+      const tr = document.createElement('tr');
+
+      // Righe dispari → setAttribute aggiunge class="evidenziato"
+      if (r % 2 !== 0) {
+        tr.setAttribute('class', 'evidenziato');
+      }
+
+      // Prima cella = intestazione di riga
+      const th = document.createElement('th');
+      th.textContent = r;
+      tr.appendChild(th);
+
+      // Celle con il prodotto r × c
+      for (let c = 1; c <= 10; c++) {
+        const td = document.createElement('td');
+        td.textContent = r * c;
+        tr.appendChild(td);
+      }
+
+      table.appendChild(tr);
+    }
+  </script>
+
+</body>
+</html>
